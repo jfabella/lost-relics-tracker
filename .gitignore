@@ -17,6 +17,7 @@ run_logs/
 non_blockchain_config.json
 
 # === Build artifacts (PyInstaller / setuptools) ===
+release
 build/
 dist/
 *.spec
