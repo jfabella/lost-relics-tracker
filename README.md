@@ -1,6 +1,3 @@
-Got it! Here’s the full `README.md` content all in one code block so you can easily copy it without extra formatting or markdown interfering:
-
-````markdown
 # Lost Relics Daily Tracker
 
 A lightweight desktop tracker for monitoring your daily Lost Relics adventure runs, blockchain items, and experience gained — built with Python and Tkinter.
@@ -137,3 +134,4 @@ Feel free to share, modify, or contribute!
 ```
 
 ---
+
