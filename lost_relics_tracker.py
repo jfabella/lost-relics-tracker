@@ -6,9 +6,11 @@ import json
 from collections import defaultdict
 from datetime import datetime
 import os
+import hashlib
 
 API_URL = "http://localhost:11990/Player"
 CHECK_INTERVAL = 5  # seconds
+REQUEST_TIMEOUT = 10  # seconds
 LOG_DIR = "run_logs"
 CONFIG_FILE = "non_blockchain_config.json"
 
@@ -17,8 +19,9 @@ class RunCounterApp:
         self.root = root
         self.root.title("Lost Relics Daily Tracker")
         self.root.geometry("350x600")
-        self.root.resizable(False, False)
+        self.root.resizable(True, True)  # <-- make window resizable
         self.root.attributes('-topmost', True)
+        self.theme_mode = 0
 
         # Default to dark mode
         self.dark_mode = True  
@@ -31,6 +34,7 @@ class RunCounterApp:
         self.skill_xp_totals = defaultdict(int)
         self.non_blockchain_totals = defaultdict(int)  
         self.total_enj_value = 0.0
+        self.total_estimated_gold = 0  # <-- NEW: track total estimated gold
         self.last_adventure_json = None
         self.player_name = "Unknown Player"
         self.start_time = datetime.now()
@@ -165,6 +169,8 @@ class RunCounterApp:
 
     def save_log(self):
         path = self.log_filepath()
+        tmp_path = path + ".tmp"  
+
         data = {
             "runs": self.counter,
             "blockchain_totals": dict(self.blockchain_totals),
@@ -176,12 +182,38 @@ class RunCounterApp:
             "total_enj_value": self.total_enj_value,
         }
         try:
-            with open(path, "w") as f:
+            with open(tmp_path, "w") as f:
                 json.dump(data, f, indent=2)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp_path, path)
         except Exception as e:
             print(f"Failed to save log file: {e}")
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
 
-    # === UI Updates ===
+    # === Adventure Signature ===
+    def adventure_signature(self, adventure: dict, data: dict) -> str:
+        name = adventure.get("AdventureName", "Unknown")
+        items = sorted(
+            [(i.get("Name"), i.get("Amount", 1), i.get("IsBlockchain", False))
+             for i in adventure.get("Items", [])]
+        )
+        signature_data = {"name": name, "items": items}
+        return hashlib.sha256(json.dumps(signature_data, sort_keys=True).encode()).hexdigest()
+
+    # == Error Logging ==
+    def save_error_log(self, message: str):
+        today = datetime.now().strftime("%Y-%m-%d")
+        path = os.path.join(LOG_DIR, f"error_{today}.txt")
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(f"[{timestamp}] {message}\n")
+        except Exception as e:
+            print("Failed to write error log:", e)
+
+    # === Update UI ===
     def update_time_labels(self):
         now = datetime.now()
         self.label_system_time.config(text=f"System Time: {now.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -198,7 +230,15 @@ class RunCounterApp:
         insert_bold(f"Total Runs: {self.counter:,}")
 
         total_gold = self.blockchain_totals.get("Gold Coins", 0)
+
+        # Calculate total estimated gold
+        self.total_estimated_gold = total_gold
+        for item, amount in self.non_blockchain_totals.items():
+            market_val = self.market_values.get(item, 0)
+            self.total_estimated_gold += market_val * amount
+
         self.text_output.insert(tk.END, f"Total Gold Coins: {total_gold:,}\n")
+        self.text_output.insert(tk.END, f"Total Estimated Gold: {self.total_estimated_gold:,.0f}\n")
         self.text_output.insert(tk.END, f"Total ENJ Value: {self.total_enj_value:,.2f}\n")
 
         insert_bold("\nAdventures:")
@@ -236,7 +276,7 @@ class RunCounterApp:
     def poll_api_loop(self):
         while True:
             try:
-                response = requests.get(API_URL)
+                response = requests.get(API_URL, timeout=REQUEST_TIMEOUT)
                 if response.status_code == 200:
                     data = response.json()
                     if data.get("PlayerName") and data["PlayerName"] != self.player_name:
@@ -244,7 +284,7 @@ class RunCounterApp:
                         self.root.after(0, lambda: self.label_player_name.config(text=self.player_name))
 
                     adventure = data.get("LastAdventure", {})
-                    current_adventure_json = json.dumps(adventure, sort_keys=True)
+                    sig = self.adventure_signature(adventure, data)
 
                     now_date = datetime.now().date()
                     if now_date != self.current_log_date:
@@ -255,16 +295,17 @@ class RunCounterApp:
                         self.total_character_xp = 0
                         self.skill_xp_totals.clear()
                         self.total_enj_value = 0.0
+                        self.total_estimated_gold = 0
                         self.last_adventure_json = None
                         self.current_log_date = now_date
                         self.start_time = datetime.now()
                         print("New day detected, counters reset.")
 
                     if self.last_adventure_json is None:
-                        self.last_adventure_json = current_adventure_json
-                    elif current_adventure_json != self.last_adventure_json:
+                        self.last_adventure_json = sig
+                    elif sig != self.last_adventure_json:
                         self.counter += 1
-                        self.last_adventure_json = current_adventure_json
+                        self.last_adventure_json = sig
 
                         self.adventure_counts[adventure.get("AdventureName", "Unknown")] += 1
                         self.total_character_xp += adventure.get("ExperienceAmount", 0)
@@ -279,27 +320,45 @@ class RunCounterApp:
                             amount = item.get("Amount", 1)
                             market_val = item.get("MarketValue", 0)
 
-                            # Always track Gold Coins
+                            # Gold Coins
                             if name == "Gold Coins":
                                 self.blockchain_totals[name] += amount
 
-                            # Only track blockchain items for ENJ
+                            # Blockchain items
                             if item.get("IsBlockchain", False):
                                 self.blockchain_totals[name] += amount
                                 if market_val:
                                     self.market_values[name] = market_val
                                     self.total_enj_value += (market_val / 100.0) * amount
 
-                            # Track chosen non-blockchain items
-                            if not item.get("IsBlockchain", False) and name in self.non_blockchain_items:
+                            # Non-blockchain items
+                            if not item.get("IsBlockchain", False):
+                                # Store total counts
                                 self.non_blockchain_totals[name] += amount
+                                # Store market values for total_estimated_gold
+                                if market_val:
+                                    self.market_values[name] = market_val
 
                     self.update_time_labels()
                     self.update_text_output()
                     self.save_log()
 
+            except requests.exceptions.Timeout:
+                msg = "Error: Request timed out"
+                print(msg)
+                self.save_error_log(msg)
+            except requests.exceptions.RequestException as e:
+                msg = f"HTTP Error: {e}"
+                print(msg)
+                self.save_error_log(msg)
+            except ValueError:
+                msg = "Error: Invalid JSON received"
+                print(msg)
+                self.save_error_log(msg)
             except Exception as e:
-                print("API Error:", e)
+                msg = f"Unexpected Error: {e}"
+                print(msg)
+                self.save_error_log(msg)
 
             time.sleep(CHECK_INTERVAL)
 
