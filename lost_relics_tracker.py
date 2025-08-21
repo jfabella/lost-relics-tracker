@@ -378,7 +378,7 @@ class RunCounterApp:
 
             # Non-blockchain
             if not item.get("IsBlockchain", False):
-                # UI/persistence only for configured items
+                # UI persistence only for configured items
                 if name in self.non_blockchain_items:
                     self.non_blockchain_totals[name] += amount
                 # Include in estimated gold unless excluded
