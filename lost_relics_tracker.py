@@ -278,7 +278,7 @@ class RunCounterApp:
         else:
             self.text_output.insert(tk.END, "(none)\n")
 
-        insert_bold("\nTracked Non-Blockchain Items (UI only):")
+        insert_bold("\nTracked Non-Blockchain Items:")
         if non_blockchain_data:
             for name, amount in non_blockchain_data:
                 self.text_output.insert(tk.END, f"{name} x{amount:,}\n")
