@@ -7,8 +7,8 @@ Keep track of your daily Lost Relics adventure runs, items, and XP in one simple
 ## Support / Donations
 If you enjoy this tool and want to support its development, you can donate:
 
-- **Enjin Matrixchain**: `<your_enjin_wallet_address_here>`  
-- **Enjin Relaychain**: `<your_enjin_wallet_address_here>`
+- **Enjin Matrixchain**: `enC1SuKusQy1QhiMEC2vaavYcZxy2ovUDoZETsa9iu5zEpUTC`  
+- **Enjin Relaychain**: `efQUbKs6THBXz5iqgbq6xueTicyF35TepybZY36RFQwZ5gRm6`
 
 Every bit helps keep the app running and improving — thank you! 
 
