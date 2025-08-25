@@ -91,6 +91,9 @@ Every bit helps keep the app running and improving — thank you!
       "Giant Bone"
     ]
     ```
+## Bugs and Issues
+- For any bugs or issues encountered, kindly raise it here with complete replication details:
+- https://github.com/jfabella/lost-relics-tracker/issues
 
 ## Requirements
 
@@ -109,5 +112,6 @@ Feel free to share, modify, or contribute!
 ```
 
 ---
+
 
 
