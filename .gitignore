@@ -8,6 +8,7 @@ __pycache__/
 venv/
 .venv/
 env/
+.env
 
 # === Logs & runtime data ===
 run_logs/
