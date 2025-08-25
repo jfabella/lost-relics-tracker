@@ -7,8 +7,11 @@ Keep track of your daily Lost Relics adventure runs, items, and XP in one simple
 ## Support / Donations
 If you enjoy this tool and want to support its development, you can donate:
 
-- **Enjin Matrixchain**: `enC1SuKusQy1QhiMEC2vaavYcZxy2ovUDoZETsa9iu5zEpUTC`  
-- **Enjin Relaychain**: `efQUbKs6THBXz5iqgbq6xueTicyF35TepybZY36RFQwZ5gRm6`
+- **Enjin Matrixchain**:
+<img src="images/qr_matrixchain.png" alt="Enjin Matrixchain QR" width="200"/>
+
+- **Enjin Relaychain**: 
+<img src="images/qr_relaychain.png" alt="Enjin Relaychain QR" width="200"/>
 
 Every bit helps keep the app running and improving — thank you! 
 
@@ -36,7 +39,6 @@ Every bit helps keep the app running and improving — thank you!
 
 ### 4. UI Interaction
 - **Toggle Theme**: Switch between light and dark modes to customize your UI experience.
-- **Manual Reset**: Clears counters for the current day while preserving the last adventure signature, preventing duplicate tracking.
 
 ### 5. Data Persistence
 - All your adventure data is automatically saved in **daily JSON files** located in the `run_logs/` directory. These files include:
@@ -58,10 +60,6 @@ Every bit helps keep the app running and improving — thank you!
 ### 7. Daily Reset
 - **Automatic Reset**: Counters automatically reset at midnight to start fresh with the new day.
 - The app will remember the **last adventure signature** to **avoid double-counting** the same adventure after the reset.
-
-### 8. Manual Reset
-- You can manually reset all counters at any time using the **Manual Reset** button in the UI.
-- This action clears all counters for the current day while ensuring that the last adventure signature remains unchanged, preventing duplicate counting.
 
 ---
 
