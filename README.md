@@ -39,10 +39,13 @@ Every bit helps keep the app running and improving — thank you!
 - Double-click the `.exe` file to run the application.
 - The app should open, and you can start interacting with the UI.
 
-### 4. UI Interaction
+### 4. Lost Relics In-Game Settings
+- Enable the Query API in your Lost Relics game by navigating to Settings → Query API.
+
+### 5. UI Interaction
 - **Toggle Theme**: Switch between light and dark modes to customize your UI experience.
 
-### 5. Data Persistence
+### 6. Data Persistence
 - All your adventure data is automatically saved in **daily JSON files** located in the `run_logs/` directory. These files include:
   - Total runs
   - Gold coins collected
@@ -51,7 +54,7 @@ Every bit helps keep the app running and improving — thank you!
   - Character XP and skill XP totals
 - On app restart, all these values are restored, allowing you to continue where you left off.
 
-### 6. Viewing Logs
+### 7. Viewing Logs
 - **Error Logs**: Any errors with the API, timeouts, or invalid data are logged in:
   - `run_logs/error_YYYY-MM-DD.txt`
   
@@ -59,7 +62,7 @@ Every bit helps keep the app running and improving — thank you!
   - `run_logs/runs_YYYY-MM-DD.json`
   - These logs can be reviewed or backed up as needed.
 
-### 7. Daily Reset
+### 8. Daily Reset
 - **Automatic Reset**: Counters automatically reset at midnight to start fresh with the new day.
 - The app will remember the **last adventure signature** to **avoid double-counting** the same adventure after the reset.
 
@@ -112,6 +115,7 @@ Feel free to share, modify, or contribute!
 ```
 
 ---
+
 
 
 
