@@ -1,129 +1,104 @@
 # Lost Relics Daily Tracker
 
-A lightweight desktop tracker for monitoring your daily Lost Relics adventure runs, blockchain items, and experience gained — built with Python and Tkinter.
+Keep track of your daily Lost Relics adventure runs, items, and XP in one simple desktop app. Built with Python and Tkinter.
 
 ---
 
-## 🧰 Features
+## Support / Donations
+If you enjoy this tool and want to support its development, you can donate:
 
-- 🎯 Counts daily adventure runs.
-- 📊 Tracks blockchain items (names and quantities).
-- ⚔️ Records experience gained:
-  - Total Character XP
-  - Skill XP: Fishing, Mining, Scavenging, Woodcutting
-- 📅 Daily log files saved automatically.
-- ⏱ Displays app uptime and system time.
-- 🔁 Data resets automatically at 12:00 AM.
-- 📦 Built as a standalone desktop app (no Python required after build).
-- 🧑‍💻 Developed by **Capoeira**.
+- **Enjin Matrixchain**:
+- Address: efQUbKs6THBXz5iqgbq6xueTicyF35TepybZY36RFQwZ5gRm6
+<img src="images/qr_matrixchain.png" alt="Enjin Matrixchain QR" width="200"/>
 
----
+- **Enjin Relaychain**:
+- Address: enC1SuKusQy1QhiMEC2vaavYcZxy2ovUDoZETsa9iu5zEpUTC
+<img src="images/qr_relaychain.png" alt="Enjin Relaychain QR" width="200"/>
 
-## 🖥️ Requirements (For Running from Source)
-
-If you're running from source code (not as an executable):
-
-- Python 3.9+
-- `requests` module
-
-Install dependencies:
-```bash
-pip install requests
-````
+Every bit helps keep the app running and improving — thank you! 
 
 ---
 
-## 🚀 How to Run
+## How to Use
 
-### 1. Running from Source Code (Development Mode)
+### 1. Download and Extract
+- Download the latest release from the [GitHub releases page](https://github.com/jfabella/lost-relics-tracker/tags).
+- Extract the contents of the `.zip` file to a folder of your choice.
+- Inside the folder, you will find the `.exe` file for the application.
 
-**Step 1:** Clone or download the repository.
+### 2. Configure Tracked Items
+- **Edit `non_blockchain_config.json`**:
+  - Open this file in a text editor (e.g., Notepad) to add or remove non-blockchain items that you wish to track in the UI.
+  - Any changes made will persist across app restarts.
 
-**Step 2:** Ensure you have Python 3.9 or newer installed.
+- **Edit `non_blockchain_exclude.json`**:
+  - This file allows you to add items that should **not contribute** to the estimated total gold.
+  - Update it as needed to ensure only relevant items are tracked for gold calculation.
 
-Check Python version:
+### 3. Run the App
+- Double-click the `.exe` file to run the application.
+- The app should open, and you can start interacting with the UI.
 
-```bash
-python --version
-```
+### 4. UI Interaction
+- **Toggle Theme**: Switch between light and dark modes to customize your UI experience.
 
-**Step 3:** Install the required Python package:
+### 5. Data Persistence
+- All your adventure data is automatically saved in **daily JSON files** located in the `run_logs/` directory. These files include:
+  - Total runs
+  - Gold coins collected
+  - Total estimated gold
+  - Blockchain and non-blockchain tracked items
+  - Character XP and skill XP totals
+- On app restart, all these values are restored, allowing you to continue where you left off.
 
-```bash
-pip install requests
-```
+### 6. Viewing Logs
+- **Error Logs**: Any errors with the API, timeouts, or invalid data are logged in:
+  - `run_logs/error_YYYY-MM-DD.txt`
+  
+- **Daily Adventure Logs**: Adventure data for each day is stored in:
+  - `run_logs/runs_YYYY-MM-DD.json`
+  - These logs can be reviewed or backed up as needed.
 
-**Step 4:** Ensure the Lost Relics game is running and its local API server is active at:
-
-```
-http://localhost:11990/Player
-```
-
-**Step 5:** Run the tracker script:
-
-```bash
-python lost_relics_tracker.py
-```
-
-The tracker window will open and start displaying your daily stats.
-
----
-
-### 2. Building a Standalone Executable (No Python Needed)
-
-If you want to share the tracker with friends who do not have Python installed:
-
-**Step 1:** Install [PyInstaller](https://pyinstaller.org/):
-
-```bash
-pip install pyinstaller
-```
-
-**Step 2:** Build the executable using PyInstaller:
-
-```bash
-pyinstaller --noconfirm --onefile --windowed lost_relics_tracker.py
-```
-
-**Step 3:** After building, find the executable in the `dist/` directory:
-
-* On Windows: `dist\lost_relics_tracker.exe`
-* On macOS/Linux: `dist/lost_relics_tracker`
-
-**Step 4:** You can now share this executable. Your friends can run it without installing Python or any dependencies.
+### 7. Daily Reset
+- **Automatic Reset**: Counters automatically reset at midnight to start fresh with the new day.
+- The app will remember the **last adventure signature** to **avoid double-counting** the same adventure after the reset.
 
 ---
 
-## 📂 Logs
+## Configuration Files
 
-All run data is stored in a folder called `run_logs/`, one file per day:
+- **`non_blockchain_config.json`**
+  - These are items whose count you want to monitor during your adventures.
+  - Example:
+    ```json
+    [
+      "Deepsea Coffer",
+      "Golden Grind Chest",
+      "Frostfall Shard",
+      "Coin Pouch",
+      "Coal"
+    ]
+    ```
 
-```
-run_logs/runs_YYYY-MM-DD.json
-```
+- **`non_blockchain_exclude.json`**
+  - Items to exclude from total estimated gold (you don’t plan to sell).
+  - Example:
+    ```json
+    [
+      "Deepsea Coffer",
+      "Zukaron",
+      "Large Bones",
+      "Giant Bone"
+    ]
+    ```
 
-This file contains your daily run counts, blockchain item totals, and XP data.
+## Requirements
 
----
+- Python 3.10+
+- Modules:
+  - `tkinter`
+  - `requests`
 
-## 📸 UI Overview
-
-* **Player Name** displayed at the top in large font
-* **System Time** and **App Uptime**
-* **Total Runs** and per-adventure run counts
-* **Character XP** and **Skill XP** (Fishing, Mining, Scavenging, Woodcutting)
-* **Blockchain Items** listed alphabetically with quantities
-
----
-
-## ⚠️ Notes
-
-* Make sure Lost Relics is running and the local API is available before starting the tracker.
-* The app polls the API every 5 seconds.
-* All data resets at midnight (system local time).
-* Logs are automatically saved daily and loaded on startup.
-
----
 
 ## 🙋‍♂️ Developer
 
@@ -134,4 +109,5 @@ Feel free to share, modify, or contribute!
 ```
 
 ---
+
 

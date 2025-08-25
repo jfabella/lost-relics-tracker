@@ -8,6 +8,7 @@ __pycache__/
 venv/
 .venv/
 env/
+.env
 
 # === Logs & runtime data ===
 run_logs/
@@ -15,6 +16,7 @@ run_logs/
 
 # === User-specific config ===
 non_blockchain_config.json
+non_blockchain_exclude.json
 
 # === Build artifacts (PyInstaller / setuptools) ===
 release
