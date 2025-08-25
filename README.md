@@ -8,9 +8,11 @@ Keep track of your daily Lost Relics adventure runs, items, and XP in one simple
 If you enjoy this tool and want to support its development, you can donate:
 
 - **Enjin Matrixchain**:
+- Address: efQUbKs6THBXz5iqgbq6xueTicyF35TepybZY36RFQwZ5gRm6
 <img src="images/qr_matrixchain.png" alt="Enjin Matrixchain QR" width="200"/>
 
-- **Enjin Relaychain**: 
+- **Enjin Relaychain**:
+- Address: enC1SuKusQy1QhiMEC2vaavYcZxy2ovUDoZETsa9iu5zEpUTC
 <img src="images/qr_relaychain.png" alt="Enjin Relaychain QR" width="200"/>
 
 Every bit helps keep the app running and improving — thank you! 
@@ -107,4 +109,5 @@ Feel free to share, modify, or contribute!
 ```
 
 ---
+
 
