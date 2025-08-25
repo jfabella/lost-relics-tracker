@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_URL = os.environ["API_URL"]
+API_URL = os.getenv("LR_API_URL", "http://localhost:11990/Player")
 CHECK_INTERVAL = 5
 REQUEST_TIMEOUT = 10
 LOG_DIR = "run_logs"
