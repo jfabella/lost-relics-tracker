@@ -63,8 +63,9 @@ Every bit helps keep the app running and improving — thank you!
   - These logs can be reviewed or backed up as needed.
 
 ### 8. Daily Reset
-- **Automatic Reset**: Counters automatically reset at midnight to start fresh with the new day.
-- The app will remember the **last adventure signature** to **avoid double-counting** the same adventure after the reset.
+- **Automatic Reset**: Counters automatically reset at the daily server reset (midnight GMT+0).  
+- **New Log File**: A fresh log file (`runs_YYYY-MM-DD.json`) is created for each new day.  
+- **No Restart Needed**: The app rolls over to the new day automatically, even if it stays running.
 
 ---
 
