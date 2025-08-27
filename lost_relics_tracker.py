@@ -304,6 +304,11 @@ class RunCounterApp:
         try:
             while not self.stop_event.is_set():
                 try:
+                    today = datetime.now(timezone.utc).date()
+                    with self.dm.lock:
+                        if today != self.dm.current_log_date:
+                            self.dm.reset_daily_counters_locked(today)
+
                     data = self.api.fetch_player_data()
                     if data.get("PlayerName"):
                         with self.dm.lock:
