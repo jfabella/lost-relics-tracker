@@ -1,6 +1,8 @@
 # Lost Relics Daily Tracker
 
-Keep track of your daily Lost Relics adventure runs, items, and XP in one simple desktop app. Built with Python and Tkinter.
+Track your Lost Relics adventures, items, rewards, and total ENJ automatically. Live-updating UI shows both blockchain and non-blockchain items, total runs, estimated gold, and total ENJ, giving you a clear view of your progress every day. 
+
+Built with Python and Tkinter.
 
 ---
 ## UI Preview
@@ -118,6 +120,7 @@ Feel free to share, modify, or contribute!
 ```
 
 ---
+
 
 
 
