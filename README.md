@@ -3,6 +3,8 @@
 Keep track of your daily Lost Relics adventure runs, items, and XP in one simple desktop app. Built with Python and Tkinter.
 
 ---
+## UI Preview
+<img width="346" height="667" alt="image" src="https://github.com/user-attachments/assets/4a309bda-b2ec-4f99-8e9c-99b0868eb4da" />
 
 ## Support / Donations
 If you enjoy this tool and want to support its development, you can donate:
@@ -116,6 +118,7 @@ Feel free to share, modify, or contribute!
 ```
 
 ---
+
 
 
 
