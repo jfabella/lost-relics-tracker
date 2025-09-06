@@ -16,6 +16,13 @@ from dotenv import load_dotenv
 from openpyxl import Workbook
 from tkinter import filedialog, messagebox
 
+def resource_path(relative_path: str) -> str:
+    try:
+        base_path = sys._MEIPASS  
+    except AttributeError:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 load_dotenv()
 
 API_URL = os.getenv("API_URL", "http://localhost:11990/Player")
@@ -28,7 +35,6 @@ EXCLUDE_FILE = "non_blockchain_exclude.json"
 DEFAULT_TRACKED_NON_BLOCKCHAIN_ITEMS = ["Deepsea Coffer", "Golden Grind Chest", "Frostfall Shard"]
 DEFAULT_EXCLUDED_NON_BLOCKCHAIN_ITEMS = ["Deepsea Coffer"]
 SKILLS = {"Fishing", "Mining", "Scavenging", "Woodcutting"}
-
 
 class APIClient:
     def __init__(self, api_url: str, timeout: int = 10):
@@ -488,11 +494,10 @@ class TrackerUI:
 
         try:
             from PIL import Image, ImageTk
-            from pathlib import Path
 
-            img_path = Path(__file__).parent / "images" / "qr_matrixchain.png"
-            if img_path.is_file():
-                qr_img = Image.open(img_path)
+            qr_img_path = resource_path("images/qr_matrixchain.png")
+            if os.path.isfile(qr_img_path):
+                qr_img = Image.open(qr_img_path)
                 qr_photo = ImageTk.PhotoImage(qr_img)
                 tk.Label(donate_window, image=qr_photo, bg=bg).pack()
                 donate_window.qr_photo = qr_photo
