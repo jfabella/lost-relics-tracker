@@ -17,6 +17,7 @@ run_logs/
 # === User-specific config ===
 non_blockchain_config.json
 non_blockchain_exclude.json
+settings.conf
 
 # === Build artifacts (PyInstaller / setuptools) ===
 release
