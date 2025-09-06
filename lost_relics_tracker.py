@@ -23,6 +23,7 @@ def resource_path(relative_path: str) -> str:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
+
 load_dotenv()
 
 API_URL = os.getenv("API_URL", "http://localhost:11990/Player")
