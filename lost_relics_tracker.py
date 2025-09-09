@@ -419,7 +419,7 @@ class TrackerUI:
         view_menu = tk.Menu(menubar, tearoff=0)
 
         totals_menu = tk.Menu(view_menu, tearoff=0)
-        totals_menu.add_checkbutton(label="Enjin Price", variable=self.show_totals["enjin_price"], command=self.refresh_ui)
+        #totals_menu.add_checkbutton(label="Enjin Price", variable=self.show_totals["enjin_price"], command=self.refresh_ui)
         totals_menu.add_checkbutton(label="Total Runs", variable=self.show_totals["runs"], command=self.refresh_ui)
         totals_menu.add_checkbutton(label="Total Gold Coins", variable=self.show_totals["gold"], command=self.refresh_ui)
         totals_menu.add_checkbutton(label="Total Estimated Gold", variable=self.show_totals["estimated_gold"], command=self.refresh_ui)
