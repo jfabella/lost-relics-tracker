@@ -233,7 +233,6 @@ class DataManager:
             pass
 
     def summarize_logs(self, start_date: str, end_date: str) -> str:
-        #"""Summarize logs from start_date to end_date (format: YYYY-MM-DD)."""
         summary = {
             "Total Runs": 0,
             "Total Gold Coins": 0,
@@ -668,7 +667,7 @@ class TrackerUI:
         except Exception:
             self.enjin_label.config(text="Enjin Price: Error", fg="black")
         finally:
-            self.root.after(600000, self.update_enjin_price)  # refresh every 10 min
+            self.root.after(600000, self.update_enjin_price)  
 
     def update_currency(self, new_currency: str):
         self.currency_var.set(new_currency)
@@ -868,3 +867,4 @@ if __name__ == "__main__":
         if app.worker_thread.is_alive():
             try: app.worker_thread.join(timeout=2.5)
             except Exception: pass
+
