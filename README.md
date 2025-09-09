@@ -6,7 +6,7 @@ Built with Python and Tkinter.
 
 ---
 ## UI Preview
-<img width="346" height="667" alt="image" src="https://github.com/user-attachments/assets/4a309bda-b2ec-4f99-8e9c-99b0868eb4da" />
+<img width="261" height="784" alt="image" src="https://github.com/user-attachments/assets/c9598bfb-9a7b-489e-9269-538bed9147c4" />
 
 ## Support / Donations
 If you enjoy this tool and want to support its development, you can donate:
@@ -120,6 +120,7 @@ Feel free to share, modify, or contribute!
 ```
 
 ---
+
 
 
 
