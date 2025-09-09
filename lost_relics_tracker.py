@@ -27,6 +27,7 @@ def resource_path(relative_path: str) -> str:
 load_dotenv()
 
 API_URL = os.getenv("API_URL", "http://localhost:11990/Player")
+APP_VERSION = "0.1.0"
 CHECK_INTERVAL = 5
 REQUEST_TIMEOUT = 10
 LOG_DIR = "run_logs"
@@ -393,8 +394,12 @@ class TrackerUI:
         self.label_elapsed_time = tk.Label(self.root, font=("Calibri", 10)); self.label_elapsed_time.pack(pady=(0, 5))
         #self.toggle_button = tk.Button(self.root, text="Toggle Theme", command=self.toggle_theme)
         #self.toggle_button.pack(pady=(0, 10))
+        self.enjin_label = tk.Label(self.root, text="Enjin Price: Loading...", font=("Calibri", 11, "bold"))
+        self.enjin_label.pack(pady=(0, 5))
         self.credit_label = tk.Label(self.root, text="Developed by Capoeira", font=("Calibri", 8))
         self.credit_label.pack(side="bottom", pady=(0, 5))
+        self.version_label = tk.Label(self.root, text=f"Version {APP_VERSION}", font=("Calibri", 8))
+        self.version_label.pack(side="bottom", pady=(0, 5))
         frame = tk.Frame(self.root); frame.pack(fill="both", expand=True, padx=5, pady=5)
         scrollbar = tk.Scrollbar(frame); scrollbar.pack(side="right", fill="y")
         self.text_output = tk.Text(frame, font=("Calibri", 11), wrap="word", yscrollcommand=scrollbar.set, height=28, width=42, borderwidth=0)
@@ -414,7 +419,7 @@ class TrackerUI:
         view_menu = tk.Menu(menubar, tearoff=0)
 
         totals_menu = tk.Menu(view_menu, tearoff=0)
-        totals_menu.add_checkbutton(label="Enjin Price", variable=self.show_totals["enjin_price"], command=self.refresh_ui)
+        #totals_menu.add_checkbutton(label="Enjin Price", variable=self.show_totals["enjin_price"], command=self.refresh_ui)
         totals_menu.add_checkbutton(label="Total Runs", variable=self.show_totals["runs"], command=self.refresh_ui)
         totals_menu.add_checkbutton(label="Total Gold Coins", variable=self.show_totals["gold"], command=self.refresh_ui)
         totals_menu.add_checkbutton(label="Total Estimated Gold", variable=self.show_totals["estimated_gold"], command=self.refresh_ui)
@@ -608,42 +613,62 @@ class TrackerUI:
             self.label_server_time,
             self.label_elapsed_time,
             self.credit_label,
+            self.version_label,
+            self.enjin_label,
             self.text_output
         ]
 
         for w in widgets:
             w.configure(bg=bg)
 
+        #self.enjin_label.config(bg=self.root["bg"])
         self.label_player_name.configure(fg=fg)
         self.label_server_time.configure(fg=fg)
         self.label_elapsed_time.configure(fg=fg)
+        self.version_label.configure(fg=credit_color)
         self.credit_label.configure(fg=credit_color)
         self.text_output.configure(fg=fg, insertbackground=fg, selectbackground=select_bg)
 
     def update_enjin_price(self):
         try:
-            url = "https://api.coingecko.com/api/v3/simple/price"
-            currency = self.currency_var.get()
-            params = {"ids": "enjincoin", "vs_currencies": currency}
-            resp = requests.get(url, params=params, timeout=10)
-            data = resp.json()
+            vs_currency = self.currency_var.get()
 
-            price = data.get("enjincoin", {}).get(currency)
-            cur = currency.upper()
+            response = requests.get(
+                "https://api.coingecko.com/api/v3/simple/price",
+                params={
+                    "ids": "enjincoin",
+                    "vs_currencies": vs_currency,
+                    "include_24hr_change": "true"
+                },
+                timeout=5
+            )
+            data = response.json().get("enjincoin", {})
 
-            if price:
-                self.enjin_price_text = f"Enjin Price: {price:,.3f} {cur}"
+            price = data.get(vs_currency)
+            change = data.get(f"{vs_currency}_24h_change", 0.0)
+            cur = vs_currency.upper()
+
+            if price is None:
+                self.enjin_label.config(text=f"Enjin Price: N/A ({cur})", fg="black")
             else:
-                self.enjin_price_text = f"Enjin Price: N/A ({cur})"
+                price_str = f"{price:,.3f}"
+                arrow = "▲" if change >= 0 else "▼"
+                color = "limegreen" if change >= 0 else "red"
 
-        except requests.exceptions.RequestException as e:
-            if resp is not None and resp.status_code == 429:
-                self.enjin_price_text = "Enjin Price: Rate limit exceeded"
+                self.enjin_label.config(
+                    text=f"Enjin Price: {price_str} {cur} {arrow} {abs(change):.1f}% (24h)",
+                    fg=color
+                )
+
+        except requests.exceptions.HTTPError as e:
+            if hasattr(e, "response") and e.response is not None and e.response.status_code == 429:
+                self.enjin_label.config(text="Enjin Price: Rate limit exceeded", fg="black")
             else:
-                self.enjin_price_text = "Enjin Price: Error"
-
+                self.enjin_label.config(text="Enjin Price: Error", fg="black")
+        except Exception:
+            self.enjin_label.config(text="Enjin Price: Error", fg="black")
         finally:
-            self.root.after(600000, self.update_enjin_price)
+            self.root.after(600000, self.update_enjin_price)  # refresh every 10 min
 
     def update_currency(self, new_currency: str):
         self.currency_var.set(new_currency)
@@ -675,9 +700,9 @@ class TrackerUI:
 
         def bold(t): self.text_output.insert(tk.END, t + "\n", "bold")
 
-        if self.show_totals["enjin_price"].get():
-            bold(self.enjin_price_text)
-            self.text_output.insert(tk.END, "\n")
+        #if self.show_totals["enjin_price"].get():
+        #    bold(self.enjin_price_text)
+        #    self.text_output.insert(tk.END, "\n")
         if self.show_totals["runs"].get():
             bold(f"Total Runs: {snap['counter']:,}")
         if self.show_totals["gold"].get():
