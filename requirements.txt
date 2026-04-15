@@ -1,0 +1,5 @@
+customtkinter
+requests
+websocket-client
+openpyxl
+python-dotenv
