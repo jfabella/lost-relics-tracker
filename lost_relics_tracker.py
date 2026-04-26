@@ -37,19 +37,19 @@ except ImportError:
 # ---------------------------------------------------------------------------
 WS_URL          = os.getenv("WS_URL", "ws://localhost:11991/")
 COINGECKO_URL   = "https://api.coingecko.com/api/v3/simple/price"
-APP_VERSION     = "0.2.2"
+APP_VERSION     = "0.2.3"
 RECONNECT_DELAY = 5
 LOG_DIR         = "run_logs"
 SETTINGS_FILE   = "settings.conf"
 CONFIG_FILE     = "non_blockchain_config.json"
 EXCLUDE_FILE    = "non_blockchain_exclude.json"
 
-DEFAULT_TRACKED_NON_BLOCKCHAIN_ITEMS  = ["Deepsea Coffer", "Golden Grind Chest", "Frostfall Shard", "Axiom Sigil"]
+DEFAULT_TRACKED_NON_BLOCKCHAIN_ITEMS  = ["Deepsea Coffer", "Golden Grind Chest", "Frostfall Shard", "Axiom Sigil", "Enchanted Stone", "Waygate Orb", "Nature's Gift"]
 DEFAULT_EXCLUDED_NON_BLOCKCHAIN_ITEMS = ["Deepsea Coffer"]
 SKILLS           = {"Fishing", "Scavenging", "Titanfall", "Breach"}
 TRANSPARENT_KEY  = "#010203"
 H_WINDOW_WIDTH   = 1400
-H_WINDOW_HEIGHT  = 300
+H_WINDOW_HEIGHT  = 250
 
 # ---------------------------------------------------------------------------
 # Fonts 
@@ -457,15 +457,6 @@ class DataManager:
 # WebSocketClient
 # ===========================================================================
 class WebSocketClient:
-    """
-    Maintains a persistent WebSocket connection to ws://localhost:11991/.
-    On connect it sends "Adventures" and "Player" to subscribe to both event
-    streams.  Incoming messages are dispatched to on_adventure / on_player
-    callbacks provided by the caller.
-
-    Auto-reconnects indefinitely with a configurable delay.
-    """
-
     def __init__(
         self,
         url: str,
@@ -489,7 +480,6 @@ class WebSocketClient:
     # Public
     # ------------------------------------------------------------------
     def run(self):
-        """Entry-point — call from a daemon thread."""
         while not self.stop_event.is_set():
             self.on_status("Connecting…")
             try:
@@ -500,7 +490,7 @@ class WebSocketClient:
                     on_error   = self._on_error,
                     on_close   = self._on_close,
                 )
-                self._ws.run_forever(ping_interval=30, ping_timeout=10)
+                self._ws.run_forever()
             except Exception as e:
                 self.on_status(f"WS error: {e}")
 
@@ -561,6 +551,7 @@ class TrackerUI:
         self.root = root
         self.dm   = dm
         settings  = dm.settings
+        self._last_ws_status = "—"
 
         self.currency_var = tk.StringVar(value=settings.get("currency", "usd"))
         self.dark_mode    = settings.get("dark_mode", True)
@@ -700,8 +691,8 @@ class TrackerUI:
 
         file_menu = tk.Menu(menubar, tearoff=0)
         file_menu.add_command(label="Summarize Runs", command=self._summarize_runs_popup)
-        file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self.root.quit)
+        #file_menu.add_separator()
+        #file_menu.add_command(label="Exit", command=self.root.quit)
         menubar.add_cascade(label="File", menu=file_menu)
 
         view_menu = tk.Menu(menubar, tearoff=0)
@@ -772,6 +763,8 @@ class TrackerUI:
         self._build_ui(self.dm.settings)
         self._build_menu()
         self.apply_theme()
+        self._update_enjin_price()
+        self.label_ws_status.configure(text=f"WS: {self._last_ws_status}")
 
     def _set_gmt_popup(self):
         current = self.dm.settings.get("gmt_offset", 0)
@@ -838,6 +831,7 @@ class TrackerUI:
     # WebSocket status 
     # ------------------------------------------------------------------
     def set_ws_status(self, text: str):
+        self._last_ws_status = text
         self.label_ws_status.configure(text=f"WS: {text}")
 
     # ------------------------------------------------------------------
@@ -885,7 +879,6 @@ class TrackerUI:
     # Main display refresh
     # ------------------------------------------------------------------
     def _write_col(self, tb: ctk.CTkTextbox, lines: list):
-        """Write (text, tag) pairs to a textbox, replacing all existing content."""
         tb.configure(state="normal")
         tb.delete("1.0", tk.END)
         for text, tag in lines:
@@ -1204,13 +1197,11 @@ class RunCounterApp:
     # Callbacks from WebSocketClient
     # ------------------------------------------------------------------
     def _check_daily_reset(self):
-        """Reset counters if the local date has rolled over. Must be called under self.dm.lock."""
         today = self.dm.now_local().date()
         if today != self.dm.current_log_date:
             self.dm.reset_daily_counters_locked(today)
 
     def _handle_adventure(self, adv: dict):
-        """Called for each adventure object in an 'adventures' event."""
         with self.dm.lock:
             self._check_daily_reset()
 
@@ -1218,7 +1209,20 @@ class RunCounterApp:
             if not instance_id or not adv.get("AdventureName"):
                 return
             if instance_id in self.dm.seen_adventure_instances:
-                return                                 
+                return     
+
+            completed_utc = adv.get("AdventureCompletedUtc")
+            if completed_utc:
+                try:
+                    adv_date = datetime.fromisoformat(
+                        completed_utc.replace("Z", "+00:00")
+                    ).astimezone(
+                        timezone(timedelta(hours=self.dm.settings.get("gmt_offset", 0)))
+                    ).date()
+                    if adv_date != self.dm.current_log_date:
+                        return
+                except Exception:
+                    pass                            
 
             self.dm.seen_adventure_instances.add(instance_id)
             self.dm.process_adventure_locked(adv)
@@ -1226,14 +1230,12 @@ class RunCounterApp:
         self.dm.save_log()
 
     def _handle_player(self, player: dict):
-        """Called when a 'player' event arrives."""
         name = player.get("PlayerName")
         if name:
             with self.dm.lock:
                 self.dm.player_name = name
 
     def _handle_container(self, cont: dict):
-        """Called for each container object in a 'containers' event."""
         with self.dm.lock:
             self._check_daily_reset()
 
@@ -1242,6 +1244,19 @@ class RunCounterApp:
                 return
             if instance_id in self.dm.seen_container_instances:
                 return
+            
+            opened_utc = cont.get("OpenedUtc")
+            if opened_utc:
+                try:
+                    cont_date = datetime.fromisoformat(
+                        opened_utc.replace("Z", "+00:00")
+                    ).astimezone(
+                        timezone(timedelta(hours=self.dm.settings.get("gmt_offset", 0)))
+                    ).date()
+                    if cont_date != self.dm.current_log_date:
+                        return
+                except Exception:
+                    pass
 
             self.dm.seen_container_instances.add(instance_id)
             self.dm.process_container_locked(cont)
@@ -1249,7 +1264,6 @@ class RunCounterApp:
         self.dm.save_log()
 
     def _handle_ws_status(self, text: str):
-        """Forward connection status to the UI label (thread-safe)."""
         self.root.after(0, self.ui.set_ws_status, text)
 
     # ------------------------------------------------------------------
@@ -1257,6 +1271,8 @@ class RunCounterApp:
     # ------------------------------------------------------------------
     def _schedule_ui_refresh(self):
         if not self.stop_event.is_set():
+            with self.dm.lock:
+                self._check_daily_reset()
             self.ui.refresh_ui()
             self.root.after(1_000, self._schedule_ui_refresh)
 
