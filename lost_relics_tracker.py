@@ -37,7 +37,7 @@ except ImportError:
 # ---------------------------------------------------------------------------
 WS_URL          = os.getenv("WS_URL", "ws://localhost:11991/")
 COINGECKO_URL   = "https://api.coingecko.com/api/v3/simple/price"
-APP_VERSION     = "0.2.3"
+APP_VERSION     = "0.2.4"
 RECONNECT_DELAY = 5
 LOG_DIR         = "run_logs"
 SETTINGS_FILE   = "settings.conf"
@@ -577,6 +577,7 @@ class TrackerUI:
         self._build_menu()
         self.apply_theme()
         self._update_enjin_price()
+        self._last_snap = None
 
     # ------------------------------------------------------------------
     # UI construction
@@ -1009,6 +1010,12 @@ class TrackerUI:
         if self.dm.settings.get("layout_mode", "vertical") == "horizontal":
             self._refresh_horizontal(snap)
             return
+
+        snap_key = (snap['counter'], snap['total_enj_value'], snap['gold_coins_total'],
+                snap['total_estimated_gold'], snap['total_character_xp'])
+        if snap_key == self._last_snap:
+            return
+        self._last_snap = snap_key
 
         yview = self.text_output._textbox.yview()
         self.text_output.configure(state="normal")
